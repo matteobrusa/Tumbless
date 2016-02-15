@@ -1,5 +1,0 @@
-{
-	"bucket":"mybucket",
-	"region":"eu-central-1",
-	"credentials":{"accessKeyId": "xxx", "secretAccessKey": "yyy"}
-}
