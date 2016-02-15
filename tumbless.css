@@ -1,3 +1,20 @@
+body {
+	font-family: "Verdana", Sans-serif;
+	min-height: 1540px;
+	background: rgb(222, 222, 222);
+}
+
+#title {
+	text-align: center;
+	margin-bottom: 5px;
+}
+
+#description {
+	text-align: center;
+	font-size: 1.2em;
+	margin-bottom: 44px;
+}
+
 .lightbox {
 	display: none;
 	position: fixed;
@@ -10,8 +27,8 @@
 	margin: auto;
 }
 
-#gallery { //
-	height: 110%;
+#gallery {
+	
 }
 
 #galleryImage {
@@ -106,9 +123,9 @@ figcaption {
 	float: left;
 	width: 100%;
 	background-size: contain;
-	padding: 0;
-	max-height: 66vw;
-	/*
+	padding: 0;  
+	
+	/*max-height: 66vw;
 	dunno why,	but	it	works*/
 }
 
@@ -185,16 +202,6 @@ article i {
 	text-align: center;
 }
 
-h1 {
-	text-align: center;
-}
-
-body {
-	font-family: "Verdana", Sans-serif;
-	min-height: 1540px;
-	background: rgb(222, 222, 222);
-}
-
 .galleria {
 	width: 700px;
 	height: 400px;
@@ -231,6 +238,11 @@ h3[contenteditable="true"] {
 	border-width: 0;
 	font-family: "Verdana", Sans-serif;
 	font-size: 1em;
+}
+
+.postdate:disabled {
+	color: #000;
+	background-color: #fff;
 }
 
 /* tablets, portrait */
