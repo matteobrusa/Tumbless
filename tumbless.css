@@ -1,0 +1,258 @@
+.lightbox {
+	display: none;
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background: rgba(10, 10, 10, 0.8);
+	text-align: center;
+	margin: auto;
+}
+
+#gallery { //
+	height: 110%;
+}
+
+#galleryImage {
+	box-shadow: 0px 0px 4px 1px rgba(0, 0, 0, 0.5);
+	max-width: 98%;
+	max-height: 98%;
+	max-height: 10vh;
+	bottom: 0;
+	left: 0;
+	margin: auto;
+	overflow: auto;
+	position: fixed;
+	right: 0;
+	top: 0;
+	zoom: 10;
+	padding-bottom: 0px;
+	position: relative;
+	transform: translate(0, 0);
+}
+
+#galleryContainer {
+	position: relative;
+	height: 0;
+}
+
+#galleryDrawer {
+	height: 100vh;
+	position: absolute;
+	top: 0;
+	width: 100%;
+	transition: transform 0.2s ease-out;
+}
+
+#galleryList {
+	box-shadow: 0px 0px 40px 10px rgba(0, 0, 0, 0.5);
+	position: relative;
+	display: inline-block;
+	padding: 0;
+	margin-top: 20px;
+	background-color: #000; //
+	opacity: 0.8;
+}
+
+.thumbnail {
+	width: 19vw;
+	height: 19vw;
+	background-size: cover;
+	opacity: 0.7; //
+	max-height: 120px; //
+	max-width: 120px; //
+	height: 120px; //
+	width: 120px;
+	display: inline-block;
+}
+
+div.horizontal {
+	display: flex;
+	justify-content: center;
+	height: 100%;
+}
+
+div.vertical {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	width: 100%;
+}
+
+figure {
+	margin: 0;
+	text-align: center;
+}
+
+figcaption {
+	padding: 8px;
+	text-align: left;
+}
+
+.photo {
+	display: inline-block;
+	margin: auto;
+	width: 25%;
+	background-size: cover;
+	background-position: center center;
+	text-align: right;
+	position: relative;
+	padding-bottom: 25%;
+	visibility: hidden;
+}
+
+.firstImage {
+	float: left;
+	width: 100%;
+	background-size: contain;
+	padding: 0;
+	max-height: 66vw;
+	/*
+	dunno why,	but	it	works*/
+}
+
+.firstImageImg {
+	padding: 0;
+	width: 100%;
+}
+
+img {
+	padding-bottom: 0px;
+}
+
+img.lightbox_trigger {
+	
+}
+
+img.photo {
+	
+}
+
+img.photo100 {
+	
+}
+
+img.photo50 {
+	padding-left: 0.1%;
+	padding-right: 0.1%;
+	width: 49.3%;
+}
+
+img.photo33 {
+	padding-left: 0.06%;
+	padding-right: 0.06%;
+	width: 32.5%;
+}
+
+.material-icons {
+	display: none;
+	font-size: 36px;
+	opacity: 0.8;
+}
+
+video {
+	width: 100%;
+}
+
+article {
+	background: #FFF;
+	width: 75%;
+	padding: 0px;
+	padding-bottom: 10px;
+	margin: auto;
+	margin-bottom: 20px;
+	max-width: 1024px;
+}
+
+article i {
+	
+}
+
+.posttitle {
+	padding: 10px;
+	font-size: 1.2em;
+	font-weight: bold;
+}
+
+.drophint {
+	display: none;
+	text-align: center;
+	font-weight: bold;
+	padding: 22px;
+	background-color: #eee;
+	margin: 5px;
+	text-align: center;
+}
+
+h1 {
+	text-align: center;
+}
+
+body {
+	font-family: "Verdana", Sans-serif;
+	min-height: 1540px;
+	background: rgb(222, 222, 222);
+}
+
+.galleria {
+	width: 700px;
+	height: 400px;
+	background: #000
+}
+
+/* editor
+*/
+i {
+	cursor: pointer;
+}
+
+h3[contenteditable="true"] {
+	background-color: #00f; /* transparent bg */
+}
+
+[contentEditable=true]:empty:not (:focus ):before {
+	content: attr(data-placeholder)
+}
+
+.deletearticle {
+	
+}
+
+.deletephoto {
+	display: none;
+	position: absolute;
+	top: 0;
+	right: 0;
+}
+
+.postdate {
+	padding-top: 12px;
+	border-width: 0;
+	font-family: "Verdana", Sans-serif;
+	font-size: 1em;
+}
+
+/* tablets, portrait */
+@media screen and (max-width: 1024px) {
+	body {
+		margin: 0;
+	}
+	article {
+		width: 86%;
+		max-width: auto;
+	}
+}
+
+/* phones */
+@media screen and (max-width: 736px) {
+	body {
+		margin: 0;
+	}
+	article {
+		width: 100%;
+		padding: 0;
+		padding-bottom: 5px;
+		max-width: auto;
+	}
+}
