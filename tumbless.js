@@ -7,21 +7,25 @@ baseUrl = "public/";
 // load the config
 //
 
-$
-		.ajax({
-			url : "config.json",
-			dataType : "json",
-			success : function(data) {
+function loadConfig() {
+	$
+			.ajax({
+				url : baseUrl +"config.json",
+				dataType : "json",
+				success : function(data) {
 
-				$("#title").html(data.title);
-				document.title = data.title;
-			},
-			error : function(xhr, ajaxOptions, thrownError) {
-				if (window.location.href.startsWith("file://")) {
-					alert("This page won't load locally.\nUpload it on a web server first.");
+					$("#title").html(data.title);
+					document.title = data.title;
+
+					$("#description").html(data.description);
+				},
+				error : function(xhr, ajaxOptions, thrownError) {
+					if (window.location.href.startsWith("file://")) {
+						alert("This page won't load locally.\nUpload it on a web server first.");
+					}
 				}
-			}
-		});
+			});
+}
 
 function loadPosts() {
 	$.ajax({
@@ -30,6 +34,8 @@ function loadPosts() {
 		success : function(data) {
 
 			Cookies.set('baseUrl', baseUrl);
+			
+			loadConfig();
 
 			posts = data;
 			if (posts.length > 0) {
@@ -111,6 +117,7 @@ function addPost(post) {
 	var d = new Date(post.date * 1000);
 	$(".postdate", template).datepicker();
 	$(".postdate", template).datepicker("setDate", d);
+	$(".postdate", template).datepicker("disable");
 
 	var mediacontainer = $(".mediacontainer", template);
 
@@ -140,21 +147,8 @@ function addPost(post) {
 		$.each(urls, function(index, url) {
 
 			var div = getTemplate("#photoTemplate");
-			if (index == 0) {
-				// get the first to calc the layout
-				div.addClass("firstImage");
-				var img = $("<img>");
-				img.appendTo(div);
 
-				img.load(function() {
-					var w = this.width;
-					var h = this.height;
-					layoutPhotoset($("div", mediacontainer), w, h)
-					img.addClass("firstImageImg");
-				});
-
-			} else
-				setPhotoSrc(div, url);
+			setPhotoSrc(div, url);
 
 			div.attr("data-src", url);
 			setGalleryEvent(div, post.urls);
@@ -162,7 +156,7 @@ function addPost(post) {
 		});
 
 		// load first img here
-		$("img", mediacontainer).attr("src", baseUrl + "images/" + urls[0]);
+		doLayout(mediacontainer);
 
 		// video template
 	} else if (post.type == "video") {
@@ -176,6 +170,35 @@ function addPost(post) {
 	}
 
 	$("#posts").append(template);
+}
+
+function doLayout(mediacontainer) {
+
+	// remove the img if there
+
+	// convert the first image
+	convertToFirstimage($(".photo", mediacontainer).first(), mediacontainer);
+}
+
+function convertToFirstimage(div, mediacontainer) {
+	// get the first to calc the layout
+	div.addClass("firstImage");
+	var img = $("<img>");
+	img.appendTo(div);
+
+	img.load(function() {
+		var w = this.width;
+		var h = this.height;
+		var photos = $(".photo", mediacontainer);
+		layoutPhotoset(photos, w, h)
+		img.addClass("firstImageImg");
+	});
+
+	var url = div.attr("data-src");
+
+	if (!url.startsWith("data:image"))
+		url = baseUrl + "images/" + url;
+	img.attr("src", url);
 }
 
 function layoutPhotoset(divs, w, h) {

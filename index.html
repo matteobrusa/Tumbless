@@ -12,7 +12,7 @@
 		<i id="newPost" class="material-icons" style="">insert photo</i> <i id="publishAction" class="material-icons" style="">publish</i>
 	</div>
 	<h1 id="title" class="editable" data-placeholder="Blog title"></h1>
-	<h3 id="description" class="editable" data-placeholder="Blog description"></h3>
+	<div id="description" class="editable" data-placeholder="Blog description"></div>
 
 	<div id="posts"></div>
 
@@ -34,9 +34,9 @@
 	<div id="loginbox" class="lightbox" style="zoom: 2">
 		<div class="horizontal">
 			<div class="vertical">
-				<div style="background-color: #888">
-					<p>This is a private blog.</p>
-					<input id="password" type="password" placeholder="password" /> <br />
+				<div style="background-color: #888; margin: auto; padding: 12px;">
+					<p style="margin: 0">This is a private blog.</p>
+					<input style="margin: 16px" id="password" type="password" placeholder="password" /> <br />
 					<button id="loginbutton" type="button">Let me in!</button>
 					<p id="wrongPassword" style="display: none">wrong password</p>
 				</div>
@@ -105,7 +105,7 @@
 
 	<script type="text/javascript" src="tumbless.js"></script>
 	<script type="text/javascript" src="admin.js"></script>
-	<script type="text/javascript" src="canvas.js"></script>
+ 
 
 </body>
 </html>
