@@ -1,13 +1,23 @@
+"use strict";
+
+var s3region, s3bucket, photoSize = 1600, thumbSize = 640, photoQ = 0.85, thumbQ = 0.80;
+
 function loadAdmin(pwd) {
 
-	var url = "admin-" + pwd + ".json";
+	// recreateThumbnails();
+
+	var url = baseUrl + "admin-" + pwd + ".json";
 
 	$.ajax({
 		url : url,
 		dataType : "json",
 		success : function(data) {
 
-			// here we go
+			if (data.photoSize)
+				photoSize = data.photoSize;
+			if (data.thumbSize)
+				thumbSize = data.thumbSize;
+
 			s3region = data.region;
 			s3bucket = data.bucket;
 
@@ -15,22 +25,21 @@ function loadAdmin(pwd) {
 
 			testS3();
 
-			$(".editable").attr("contenteditable", "true");
-
 			$("#newPost").show();
 			$("#newPost").click(function() {
-				newPost();
+				var newpost = newPost();
+				$(".articleedit", newpost).click(editArticle);
+				$(".articleedit", newpost).click();
 			});
 
-			$("article i").show();
+			$("#exitAdmin").show();
+			$("#exitAdmin").click(function() {
+				location = location.pathname.split("?")[0];
+			});
 
-			$("#publishAction").click(saveChanges);
+			$(".articleactions").css("display", "inline-block");
 
-			$(".drophint").show();
-
-			$(".postdate").datepicker("enable");
-
-			bindActions();
+			$(".articleedit").click(editArticle);
 
 		},
 		error : function(xhr, ajaxOptions, thrownError) {
@@ -42,35 +51,51 @@ function loadAdmin(pwd) {
 	});
 }
 
-function bindActions() {
+function editArticle(event) {
+	var article = $(event.target).parents("article");
 
-	$(".editable").unbind("focusout");
-	$(".editable").focusout(function() {
+	$(".postdate", article).datepicker("enable");
+	$(".editable", article).attr("contenteditable", "true");
+	$(".drophint", article).show();
+
+	$(".articleedit", article).hide();
+
+	$(".articlesave", article).show();
+
+	$(".articlesave").click(function(event) {
+
+		// save here
+
 		confirmEdit($(this));
+
+		$(".articleedit").show();
+		$(".articledelete").hide();
+		$(".articlesave").hide();
+		$(".drophint", article).hide();
+		$(".editable", article).attr("contenteditable", "false");
+		$(".postdate", article).datepicker("disable");
+		$(".photodelete", article).hide();
+
 	});
 
-	$("article i[class*='deletearticle']").unbind("click");
-	$("article i[class*='deletearticle']").click(function() {
-		deletearticle($(this));
-	});
-
-	$("article .photo i").unbind("click");
-	$("article .photo i").click(function() {
+	$(".photodelete", article).show();
+	$(".photodelete", article).unbind("click");
+	$(".photodelete", article).click(function() {
 		deleteImage($(this));
 	});
 
-	$("input").unbind("change");
-	$("input").change(function() {
-		confirmEdit($(this));
+	$(".articledelete", article).show();
+	$(".articledelete", article).unbind("click");
+	$(".articledelete", article).click(function() {
+		deletearticle($(this));
 	});
 
-	$("article").each(function(index, article) {
-		bindDropArea(article);
+	$("input[type=file]").unbind("change");
+	$("input[type=file]").change(function() {
+		startFileUpload($(this));
 	});
-}
 
-function flagPendingChanges() {
-	$("body i").show();
+	bindDropArea(article[0]);
 }
 
 function saveChanges() {
@@ -106,9 +131,7 @@ function newPost() {
 	var post = {};
 	post[id] = id;
 
-	flagPendingChanges();
-
-	bindActions();
+	return template;
 }
 
 function deletearticle(i) {
@@ -119,7 +142,9 @@ function deletearticle(i) {
 	if (articleId) {
 		article.remove();
 		delPost(articleId);
-		flagPendingChanges();
+		uploadPosts(function() {
+			console.log("saved posts");
+		});
 	}
 }
 
@@ -129,10 +154,7 @@ function deleteImage(i) {
 	var articleId = article.attr("id");
 
 	if (articleId) {
-
 		i.parent().remove();
-		buildAndStorePost(articleId, article);
-
 		layoutAgainPhotoset(article);
 	}
 }
@@ -161,7 +183,11 @@ function buildAndStorePost(articleId, article) {
 	// update the big list
 	putPost(post);
 
-	flagPendingChanges();
+	console.log("added post " + post);
+
+	uploadPosts(function() {
+		console.log("saved posts");
+	});
 }
 
 function uploadPosts(callback) {
@@ -172,25 +198,35 @@ function uploadJson(filename, sJson, callback) {
 	s3Upload(baseUrl + filename, "application/json", sJson, callback);
 }
 
-function uploadImage(filename, blob, callback) {
-	s3Upload(baseUrl + "images/" + filename, "image/jpeg", blob, callback);
+function uploadImage(prefix, filename, blob, callback) {
+	s3Upload(baseUrl + prefix + filename, "image/jpeg", blob, callback);
+}
+
+function uploadVideo(filename, mime, data, callback) {
+	s3Upload(baseUrl + PREFIX_VIDEOS + filename, mime, data, callback);
 }
 
 function putPost(post) {
 
-	// TODO: date-aware insertion and update
-
+	// remove if exists
 	for (var i = 0; i < posts.length; i++) {
-
 		var p = posts[i];
 		if (p.id == post.id) {
-			posts[i] = post; // update
-			return;
+			posts.splice(i, 1);
+			break;
 		}
 	}
 
-	posts.unshift(post); // new post
+	// insert at specific date
+	for (var i = 0; i < posts.length; i++) {
+		var p = posts[i];
+		if (p.date < post.date) {
+			posts.splice(i, 0, post); // insert
+			break;
+		}
+	}
 }
+
 function delPost(postId) {
 
 	// TODO: date-aware insertion and update
@@ -207,84 +243,143 @@ function delPost(postId) {
 	posts.unshift(post);
 }
 
+// UI
+
+function addSpinner(div) {
+	var spinner = getTemplate("#spinner");
+	div.append(spinner);
+}
+
+function removeSpinner(div) {
+	$("i.fa.fa-cog.fa-spin.fa-4x", div).remove();
+}
+
+function recreateThumbnails() {
+	$.each(posts, function(index, post) {
+		if (post.urls) {
+			$.each(post.urls, function(index, src) {
+
+				console.log("creating thumbnail for " + src);
+
+				var url = getImageURL(src);
+
+				scaleAndUploadImageFromUrl(url, null, thumbSize, thumbQ, PREFIX_THUMBNAILS, src,
+						function(article, data) {
+
+							console.log("downloaded " + url);
+
+						}, function(photo, filename) {
+
+							console.log("uploaded " + filename);
+						});
+			});
+		} else if (post.url) {
+
+		}
+	});
+}
+
 /* canvas stuff */
 
-var MAX_SIZE = 1280;
+function processImage(src, article, imgSize) {
 
-function loadImage(src, article) {
+	// generate photo and thumbnail
 
-	// Prevent any non-image file type from being read.
-	if (!src.type.match(/image.*/)) {
-		console.log("The dropped file is not an image: ", src.type);
-		return;
-	}
+	scaleAndUploadImage(src, article, imgSize, photoQ, PREFIX_IMAGES, onImageScaled, onImageUploaded);
+	scaleAndUploadImage(src, null, thumbSize, thumbQ, PREFIX_THUMBNAILS, null, null);
+}
+
+function onImageScaled(article, data) {
+	var photo = getTemplate("#photoTemplate");
+	$("figure", article).append(photo);
+	addSpinner(photo);
+
+	// for the time being inline image, will replace upon upload
+	photo.css("background-image", "url(" + data + ")");
+	photo.attr("data-src", data);
+
+	doLayout($(".mediacontainer", article));
+
+	return photo;
+}
+
+function onImageUploaded(photo, filename) {
+
+	removeSpinner(photo);
+
+	// replace inlined image with proper source, to make gallery work
+	photo.attr("data-src", filename);
+
+	// recreate the list of URLs for the gallery
+	var article = $(photo).parents("article");
+	var urls = [];
+	$(".photo", article).each(function(index, el) {
+		urls.push($(el).attr("data-src"));
+	});
+
+	setGalleryEvent(photo, urls);
+
+}
+
+function scaleAndUploadImage(src, article, imgSize, imgQuality, pathPrefix, cbImageScaled, cbImageUploaded) {
+
+	console.log("scaling " + src.name);
 
 	// Create our FileReader and run the results through the render function.
 	var reader = new FileReader();
 	reader.onload = function(e) {
 
-		var photo = getTemplate("#photoTemplate");
-		$("figure", article).append(photo);
+		var filename = $.datepicker.formatDate("yymmdd", new Date()) + "_" + src.name;
 
-		var canvas = $("<canvas>")[0];// getTemplate("#canvasTemplate");
-
-		var image = new Image();
-		image.onload = function() {
-
-			if (image.height > MAX_SIZE) {
-				image.width *= MAX_SIZE / image.height;
-				image.height = MAX_SIZE;
-			}
-			if (image.width > MAX_SIZE) {
-				image.height *= MAX_SIZE / image.width;
-				image.width = MAX_SIZE;
-			}
-			var ctx = canvas.getContext("2d");
-			ctx.clearRect(0, 0, canvas.width, canvas.height);
-			canvas.width = image.width;
-			canvas.height = image.height;
-			ctx.drawImage(image, 0, 0, image.width, image.height);
-
-			// compress to jpg and attach to anchor
-			var data = canvas.toDataURL("image/jpeg", 0.9);
-
-			photo.css("background-image", "url(" + data + ")");
-			photo.attr("data-src", data); // for the time being, will replace
-			// upon
-			// upload
-			var filename = $.datepicker.formatDate("yymmdd", new Date()) + "_"
-					+ src.name;
-			var blob = dataURItoBlob(data);
-			console.log("uploading " + filename);
-			uploadImage(filename, blob, function() {
-				console.log("uploaded " + filename);
-
-				photo.attr("data-src", filename);
-
-				var urls = [];
-				$(".photo", article).each(function(index, el) {
-					urls.push($(el).attr("data-src"));
-				});
-
-				setGalleryEvent(photo, urls);
-
-				// completeUpload(photo, filename);
-			});
-
-			doLayout($(".mediacontainer", article));
-		};
-		image.src = e.target.result;
-
-		/*
-		 * var data= cancan.toDataURL("image/jpeg",0.9); can[0].href = data;
-		 * can[0].download=$.datepicker.formatDate("yymmdd", new Date()) +"_"+
-		 * src.name; /*can.click(function() {
-		 * 
-		 * 
-		 * });
-		 */
+		scaleAndUploadImageFromUrl(e.target.result, article, imgSize, imgQuality, pathPrefix, filename, cbImageScaled,
+				cbImageUploaded);
 	};
 	reader.readAsDataURL(src);
+}
+
+function scaleAndUploadImageFromUrl(url, article, imgSize, imgQuality, pathPrefix, filename, cbImageScaled,
+		cbImageUploaded) {
+
+	var image = new Image();
+	image.onload = function() {
+
+		var canvas = $("<canvas>")[0];
+
+		if (image.height > imgSize) {
+			image.width *= imgSize / image.height;
+			image.height = imgSize;
+		}
+		if (image.width > imgSize) {
+			image.height *= imgSize / image.width;
+			image.width = imgSize;
+		}
+		var ctx = canvas.getContext("2d");
+		ctx.clearRect(0, 0, canvas.width, canvas.height);
+		canvas.width = image.width;
+		canvas.height = image.height;
+		ctx.drawImage(image, 0, 0, image.width, image.height);
+
+		// compress to jpg and attach to anchor
+		var data = canvas.toDataURL("image/jpeg", imgQuality);
+
+		var blob = dataURItoBlob(data);
+
+		// upload to s3
+		console.log("uploading " + filename);
+		uploadImage(pathPrefix, filename, blob, function() {
+
+			console.log("uploaded " + pathPrefix + filename);
+
+			// callback
+			if (cbImageUploaded)
+				cbImageUploaded(photo, filename);
+		});
+
+		// callback, photo might be null
+		if (cbImageScaled)
+			var photo = cbImageScaled(article, data);
+	};
+	image.src = url;
 }
 
 function completeUpload(photo, filename) {
@@ -314,13 +409,13 @@ function dataURItoBlob(dataURI) {
 	});
 }
 
-function download(filename, href) {
-	$("<a />", {
-		"download" : filename,
-		"href" : href
-	}).appendTo("body").click(function() {
-		$(this).remove()
-	})[0].click();
+/*
+ * function download(filename, href) { $("<a />", { "download" : filename, "href" : href
+ * }).appendTo("body").click(function() { $(this).remove() })[0].click(); }
+ */
+
+function processVideo(file, article) {
+	uploadVideo(file.name, file.type, file, null);
 }
 
 /* drag and rop */
@@ -333,8 +428,29 @@ function dropListener(e) {
 
 	var article = e.currentTarget;
 
-	$.each(e.dataTransfer.files, function(index, img) {
-		loadImage(img, article);
+	$.each(e.dataTransfer.files, function(index, file) {
+		// Prevent any non-image file type from being read.
+		if (file.type.match(/image.*/)) {
+			processImage(file, article, photoSize);
+		} else if (file.type.match(/video.*/)) {
+			processVideo(file, article);
+		}
+	});
+}
+
+function startFileUpload(obj) {
+
+	var article = $(obj).parents("article");
+
+	$.each(obj[0].files, function(index, file) {
+
+		// Prevent any non-image file type from being read.
+		if (file.type.match(/image.*/)) {
+			processImage(file, article, photoSize);
+		} else if (file.type.match(/video.*/)) {
+			processVideo(file, article);
+		}
+
 	});
 }
 

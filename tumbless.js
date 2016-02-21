@@ -1,30 +1,35 @@
-startcount = 8;
-actualcount = 0;
-posts = null;
-baseUrl = "public/";
+"use strict";
+
+var startcount = 8;
+var actualcount = 0;
+var posts = null;
+var baseUrl = "public/";
+var PREFIX_IMAGES = "images/";
+var PREFIX_THUMBNAILS = "thumbnails/";
+var PREFIX_VIDEOS = "videos/";
+var galleryIndex, galleryList;
 
 //
 // load the config
 //
 
 function loadConfig() {
-	$
-			.ajax({
-				url : baseUrl +"config.json",
-				dataType : "json",
-				success : function(data) {
+	$.ajax({
+		url : baseUrl + "config.json",
+		dataType : "json",
+		success : function(data) {
 
-					$("#title").html(data.title);
-					document.title = data.title;
+			$("#title").html(data.title);
+			document.title = data.title;
 
-					$("#description").html(data.description);
-				},
-				error : function(xhr, ajaxOptions, thrownError) {
-					if (window.location.href.startsWith("file://")) {
-						alert("This page won't load locally.\nUpload it on a web server first.");
-					}
-				}
-			});
+			$("#description").html(data.description);
+		},
+		error : function(xhr, ajaxOptions, thrownError) {
+			if (window.location.href.startsWith("file://")) {
+				alert("This page won't load locally.\nUpload it on a web server first.");
+			}
+		}
+	});
 }
 
 function loadPosts() {
@@ -33,8 +38,10 @@ function loadPosts() {
 		dataType : "json",
 		success : function(data) {
 
-			Cookies.set('baseUrl', baseUrl);
-			
+			Cookies.set('baseUrl', baseUrl, {
+				expires : 64
+			});
+
 			loadConfig();
 
 			posts = data;
@@ -76,16 +83,36 @@ function loadPosts() {
 }
 
 function pageReady() {
+
+	$("#gallery").click(function(e) {
+		console.log("gallery click");
+		$("#gallery").fadeOut(100);
+	});
+
 	if (window.location.href.indexOf("admin") > 0) {
 
-		// get the admin login
-		$("#adminbox").show();
-		$("#adminbutton").on("click", function() {
-			$("#adminbox").hide();
-			var pwd = $("#adminpassword").val();
+		var pwd = urlParam("admin");
+		if (pwd) {
 			loadAdmin(pwd);
-		});
-		$("#adminpassword").focus();
+		} else {
+
+			// get the admin login
+			$("#adminbox").show();
+			$("#adminbutton").on("click", function() {
+				$("#adminbox").hide();
+				var pwd = $("#adminpassword").val();
+				loadAdmin(pwd);
+			});
+			$("#adminpassword").keypress(function(e) {
+				if (e.which == 13) {
+					$("#adminbox").hide();
+					var pwd = $("#adminpassword").val();
+					loadAdmin(pwd);
+				}
+			});
+
+			$("#adminpassword").focus();
+		}
 	}
 }
 
@@ -108,9 +135,6 @@ function addPost(post) {
 
 	template.attr("id", post.id);
 	$(".posttitle", template).html(post.title);
-	if (!post.title)
-		$(".posttitle", template).hide();
-	// $(".postdate", template).text(timestampToStringDate(post.date));
 
 	$(".postdescription", template).html(post.description);
 
@@ -124,22 +148,12 @@ function addPost(post) {
 	// photo template
 	if (post.type == "photo") {
 
-		var div = getTemplate("#photoTemplate");
-		div.addClass("firstImage");
-		var img = $("<img>");
-		img.appendTo(div);
-		img.addClass("firstImageImg");
+		post.urls = [ post.url ];
+		post.type = "photoset";
+	}
 
-		div.css("visibility", "visible");
-
-		img.attr("src", baseUrl + "images/" + post.url);
-
-		div.attr("data-src", post.url);
-		setGalleryEvent(div, null);
-		mediacontainer.append(div);
-
-		// photoset template
-	} else if (post.type == "photoset") {
+	// photoset template
+	if (post.type == "photoset") {
 
 		var urls = post.urls;
 
@@ -148,10 +162,16 @@ function addPost(post) {
 
 			var div = getTemplate("#photoTemplate");
 
-			setPhotoSrc(div, url);
+			var singlePhoto = urls.length == 1;
+
+			if (singlePhoto)
+				div.css("float", "none");
+
+			if (index > 0)
+				setPhotoSrc(div, url);
 
 			div.attr("data-src", url);
-			setGalleryEvent(div, post.urls);
+			setGalleryEvent(div, singlePhoto ? null : post.urls);
 			mediacontainer.append(div);
 		});
 
@@ -163,7 +183,7 @@ function addPost(post) {
 
 		var a = getTemplate("#videoTemplate");
 		$(".src", a).attr("src", baseUrl + "videos/" + post.url);
-		a.attr("poster", baseUrl + "images/" + post.placeholder);
+		a.attr("poster", getImageURL(post.placeholder));
 
 		mediacontainer.append(a);
 
@@ -175,16 +195,24 @@ function addPost(post) {
 function doLayout(mediacontainer) {
 
 	// remove the img if there
+	$("img", mediacontainer).remove();
 
 	// convert the first image
 	convertToFirstimage($(".photo", mediacontainer).first(), mediacontainer);
 }
 
 function convertToFirstimage(div, mediacontainer) {
+
+	var url = div.attr("data-src");
+	if (!url)
+		return;
+
 	// get the first to calc the layout
 	div.addClass("firstImage");
 	var img = $("<img>");
 	img.appendTo(div);
+
+	div.css("padding-bottom", "0");
 
 	img.load(function() {
 		var w = this.width;
@@ -194,16 +222,15 @@ function convertToFirstimage(div, mediacontainer) {
 		img.addClass("firstImageImg");
 	});
 
-	var url = div.attr("data-src");
-
 	if (!url.startsWith("data:image"))
-		url = baseUrl + "images/" + url;
+		url = getImageURL(url);
 	img.attr("src", url);
 }
 
 function layoutPhotoset(divs, w, h) {
 
-	var aspect = w / h;
+	var aspect = w * 0.995 / h;
+	var a, c;
 
 	if (aspect > 1 && (divs.length % 3 == 1)) {
 		divs.each(function(index, el) {
@@ -211,8 +238,8 @@ function layoutPhotoset(divs, w, h) {
 			if (index == 0)
 				el.css("width", "100%");
 			else {
-				el.css("width", "33.3%");
-				el.css("padding-bottom", "33.3%");
+				el.css("width", "33.33%");
+				el.css("padding-bottom", "33.33%");
 			}
 		});
 	} else if (divs.length == 2) {
@@ -240,8 +267,8 @@ function layoutPhotoset(divs, w, h) {
 				el.css("width", c + "%");
 				el.css("padding-bottom", c + "%");
 			} else {
-				el.css("width", "33.3%");
-				el.css("padding-bottom", "33.3%");
+				el.css("width", "33.33%");
+				el.css("padding-bottom", "33.33%");
 			}
 		});
 	} else if (aspect <= 1 && (divs.length % 3 == 1)) {
@@ -256,8 +283,8 @@ function layoutPhotoset(divs, w, h) {
 				el.css("width", c + "%");
 				el.css("padding-bottom", c + "%");
 			} else {
-				el.css("width", "33.3%");
-				el.css("padding-bottom", "33.3%");
+				el.css("width", "33.33%");
+				el.css("padding-bottom", "33.33%");
 			}
 		});
 	} else if (divs.length % 3 == 2) {
@@ -272,8 +299,8 @@ function layoutPhotoset(divs, w, h) {
 				el.css("width", c + "%");
 				el.css("padding-bottom", c + "%");
 			} else {
-				el.css("width", "33.3%");
-				el.css("padding-bottom", "33.3%");
+				el.css("width", "33.33%");
+				el.css("padding-bottom", "33.33%");
 			}
 		});
 
@@ -284,7 +311,19 @@ function layoutPhotoset(divs, w, h) {
 }
 
 function setPhotoSrc(div, src) {
-	div.css("background-image", "url(" + baseUrl + "images/" + src + ")");
+
+	if (!src.startsWith("data:image"))
+		src = getThumbnailURL(src);
+
+	div.css("background-image", "url(" + src + ")");
+}
+
+function getImageURL(src) {
+	return baseUrl + PREFIX_IMAGES + src;
+}
+
+function getThumbnailURL(src) {
+	return baseUrl + PREFIX_THUMBNAILS + src;
 }
 
 //
@@ -316,11 +355,20 @@ function dateToTimestamp(date) {
 	return d / 1000;
 }
 
+function urlParam(name) {
+	var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
+	if (results == null) {
+		return null;
+	} else {
+		return results[1] || 0;
+	}
+}
+
 //
 // infinite scrolling
 //
+window.addEventListener("scroll", function() {
 
-$(window).scroll(function() {
 	if (posts) {
 
 		var scrollTop = $(window).scrollTop();
@@ -346,29 +394,30 @@ function showGallery(src, list) {
 
 	$('#gallery').fadeIn(100);
 
-	$('#galleryImage').attr("src", src);
+	$('#galleryImage').css("background-image", "url('" + getThumbnailURL(src) + "')");
+
+	$('#galleryImage').attr("src", null);
+	$('#galleryImage').attr("src", getImageURL(src));
+
+	// set the bg URL
+
 	$('#galleryImage').fadeOut(0);
 	$('#galleryImage').fadeIn(280);
+
 	$('#galleryImage').swipe(swipeOptions);
 
 	$("#galleryList").empty();
 
 	if (list)
 		$.each(list, function(index, url) {
-			tmb = getTemplate("#thumbnail");
+			var tmb = getTemplate("#thumbnail");
 
-			// tmb.attr("src", baseUrl + "images/" + url);
-
-			var fullUrl = baseUrl + "images/" + url;
-			tmb.css("background-image", "url(" + fullUrl + ")");
-			tmb.attr("data-src", fullUrl);
+			var fullUrl = getImageURL(url);
+			var tmbUrl = getThumbnailURL(url);
+			tmb.css("background-image", "url(" + tmbUrl + ")");
+			tmb.attr("data-src", url);
 
 			$("#galleryList").append(tmb);
-
-			/*
-			 * var len= list.length; if (len >5) len= 5; tmb.css("max-width",
-			 * (100)/len+"%");
-			 */
 
 			setGalleryEvent(tmb, list);
 
@@ -384,11 +433,7 @@ function setGalleryEvent(source, list) {
 
 		e.preventDefault();
 
-		// var img = $("img", this);
-		// src = img.attr("src");
-
-		// if (!src)
-		src = baseUrl + "images/" + $(this).attr("data-src");
+		var src = $(this).attr("data-src");
 
 		showGallery(src, list);
 
@@ -396,8 +441,89 @@ function setGalleryEvent(source, list) {
 	});
 }
 
-speed = 500;
-threshold = $("body").width() / 10;
+function showGalleryFrame() {
+
+	showGalleryDrawer();
+
+	window.setTimeout(hideGalleryDrawer, 2000);
+}
+
+function scrollImages(distance, duration) {
+
+	// console.log("scroll by " + distance);
+
+	// inverse the number we set in the css
+	var value = (distance < 0 ? "" : "-") + Math.abs(distance).toString();
+	$('#galleryImage').css("transform", "translate(" + value + "px,0)");
+}
+
+$(document).keydown(function(e) {
+
+	if ($("#gallery").is(':visible')) {
+		switch (e.which) {
+		case 37: // left
+			previousImage();
+			break;
+
+		case 39: // right
+			nextImage();
+			break;
+
+		default:
+			return;
+		}
+		e.preventDefault(); // prevent the default action (scroll / move caret)
+	}
+});
+
+function previousImage() {
+	console.log("previous");
+	var gi = Math.max(galleryIndex - 1, 0);
+
+	$('#galleryImage').css("transform", "translate(0px,0)");
+	showGallery(galleryList[gi], galleryList);
+}
+
+function nextImage() {
+	console.log("next");
+	var gi = Math.min(galleryIndex + 1, galleryList.length - 1);
+	$('#galleryImage').css("transform", "translate(0px,0)");
+	showGallery(galleryList[gi], galleryList);
+}
+
+function showGalleryDrawer() {
+
+	var abspos = $("#closeGallery")[0].getBoundingClientRect().top;
+
+	var n = 10 - abspos;
+
+	if (n > 0)
+		$("#closeGallery").css("transform", "translate(0px," + n + "px)");
+
+	// drawer pos
+	var abspos = $("#galleryDrawer")[0].getBoundingClientRect().top;
+	var h = $(window).height();
+	var glh = $("#galleryList").height();
+	var n = h - glh - abspos - 20 - 10;
+
+	if (n < 0)
+		$("#galleryDrawer").css("transform", "translate(0px," + n + "px)");
+}
+function hideGalleryDrawer() {
+
+	$("#closeGallery").css("transform", "translate(0px, 0px)");
+	$("#galleryDrawer").css("transform", "translate(0px,0)");
+}
+
+$("#galleryDrawer").hover(showGalleryDrawer, hideGalleryDrawer());
+
+$('#galleryImage').click(function(event) {
+	// console.log(event);
+	event.stopPropagation();
+});
+
+var speed = 500;
+var threshold = $("body").width() / 10;
 var t2 = $("body").height() / 10;
 if (t2 < threshold)
 	threshold = t2;
@@ -406,10 +532,19 @@ var swipeOptions = {
 	triggerOnTouchEnd : true,
 	swipeStatus : swipeStatus,
 	allowPageScroll : "vertical",
-	threshold : threshold
+	threshold : threshold,
+	tap : doTap
+
 };
 
+function doTap(event) {
+	event.stopPropagation();
+	showGalleryFrame();
+}
+
 function swipeStatus(event, phase, direction, distance) {
+
+	event.stopPropagation();
 
 	// If we are moving before swipe, and we are going L or R in X mode, or U or
 	// D in Y mode then drag.
@@ -425,9 +560,10 @@ function swipeStatus(event, phase, direction, distance) {
 	} else if (phase == "cancel") {
 		console.log("phase " + phase);
 		if (distance < 10) {
-			console.log("You tapped");
-			$('#gallery').fadeOut(100);
+
 			event.preventDefault();
+			console.log("You tapped");
+
 		} else
 			scrollImages(0, speed);
 
@@ -444,45 +580,3 @@ function swipeStatus(event, phase, direction, distance) {
 			scrollImages(0, speed);
 	}
 }
-
-function scrollImages(distance, duration) {
-
-	console.log("scroll by " + distance);
-
-	// $('#galleryImage').css("transition-duration", (duration /
-	// 1000).toFixed(1) + "s");
-
-	// inverse the number we set in the css
-	var value = (distance < 0 ? "" : "-") + Math.abs(distance / 10).toString();
-	$('#galleryImage').css("transform", "translate(" + value + "px,0)");
-}
-
-function previousImage() {
-	console.log("previous");
-	gi = Math.max(galleryIndex - 1, 0);
-
-	$('#galleryImage').css("transform", "translate(0px,0)");
-	showGallery(baseUrl + "images/" + galleryList[gi], galleryList);
-}
-
-function nextImage() {
-	console.log("next");
-	gi = Math.min(galleryIndex + 1, galleryList.length - 1);
-	$('#galleryImage').css("transform", "translate(0px,0)");
-	showGallery(baseUrl + "images/" + galleryList[gi], galleryList);
-}
-
-$("#galleryDrawer").hover(function() {
-	abspos = $("#galleryDrawer")[0].getBoundingClientRect().top;
-	h = $(window).height();
-
-	glh = $("#galleryList").height();
-	n = h - glh - abspos - 20 - 10;
-
-	// console.log("abs= " + abspos + " h= " + h + " n: " + n);
-
-	if (n < 0)
-		$("#galleryDrawer").css("transform", "translate(0px," + n + "px)");
-}, function() {
-	$("#galleryDrawer").css("transform", "translate(0px,0)");
-});

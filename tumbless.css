@@ -1,18 +1,10 @@
 body {
-	font-family: "Verdana", Sans-serif;
 	min-height: 1540px;
-	background: rgb(222, 222, 222);
 }
 
-#title {
-	text-align: center;
-	margin-bottom: 5px;
-}
-
-#description {
-	text-align: center;
-	font-size: 1.2em;
-	margin-bottom: 44px;
+p {
+	margin-top: 0.3em;
+	margin-bottom: 0em;
 }
 
 .lightbox {
@@ -31,11 +23,29 @@ body {
 	
 }
 
+#closeGallery {
+	position: absolute;
+	left: 50%;
+	top: -75px;
+	transition: transform 0.2s ease-out;
+}
+
+#closeGallery div {
+	position: relative;
+	left: -50%;
+	border-radius: 10px;
+	background: rgba(22, 22, 22, 0.9);
+	padding: 11px;
+	font-size: 1.5em;
+	text-shadow: none;
+	color: #fff;
+}
+
 #galleryImage {
 	box-shadow: 0px 0px 4px 1px rgba(0, 0, 0, 0.5);
 	max-width: 98%;
 	max-height: 98%;
-	max-height: 10vh;
+	max-height: 98vh;
 	bottom: 0;
 	left: 0;
 	margin: auto;
@@ -43,10 +53,10 @@ body {
 	position: fixed;
 	right: 0;
 	top: 0;
-	zoom: 10;
 	padding-bottom: 0px;
 	position: relative;
 	transform: translate(0, 0);
+	background-size: contain;
 }
 
 #galleryContainer {
@@ -73,14 +83,12 @@ body {
 }
 
 .thumbnail {
-	width: 19vw;
-	height: 19vw;
+	width: 16vw;
+	height: 16vw;
 	background-size: cover;
-	opacity: 0.7; //
-	max-height: 120px; //
-	max-width: 120px; //
-	height: 120px; //
-	width: 120px;
+	opacity: 0.8;
+	max-height: 20vh;
+	max-width: 20vh;
 	display: inline-block;
 }
 
@@ -102,11 +110,6 @@ figure {
 	text-align: center;
 }
 
-figcaption {
-	padding: 8px;
-	text-align: left;
-}
-
 .photo {
 	display: inline-block;
 	margin: auto;
@@ -117,16 +120,14 @@ figcaption {
 	position: relative;
 	padding-bottom: 25%;
 	visibility: hidden;
+	vertical-align: top;
 }
 
 .firstImage {
 	float: left;
 	width: 100%;
 	background-size: contain;
-	padding: 0;  
-	
-	/*max-height: 66vw;
-	dunno why,	but	it	works*/
+	padding: 0;
 }
 
 .firstImageImg {
@@ -136,30 +137,7 @@ figcaption {
 
 img {
 	padding-bottom: 0px;
-}
-
-img.lightbox_trigger {
-	
-}
-
-img.photo {
-	
-}
-
-img.photo100 {
-	
-}
-
-img.photo50 {
-	padding-left: 0.1%;
-	padding-right: 0.1%;
-	width: 49.3%;
-}
-
-img.photo33 {
-	padding-left: 0.06%;
-	padding-right: 0.06%;
-	width: 32.5%;
+	vertical-align: top;
 }
 
 .material-icons {
@@ -173,33 +151,75 @@ video {
 }
 
 article {
-	background: #FFF;
+	background: rgba(0, 0, 0, 0);
 	width: 75%;
 	padding: 0px;
-	padding-bottom: 10px;
 	margin: auto;
-	margin-bottom: 20px;
+	margin-bottom: 64px;
 	max-width: 1024px;
+	box-shadow: 1px 1px 15px 5px rgba(0, 0, 0, 0.4);
 }
 
-article i {
-	
+.actionbutton {
+	background-color: #4BC44B;
+	margin: 10px;
+	padding: 3px 5px 2px 4px;
+	border-radius: 6px;
+}
+
+.articleactions {
+	display: none;
+	border-radius: 9px;
+	position: absolute;
+	text-align: right;
+	padding: 4px;
+	right: 0em;
+	z-index: 1234;
+	bottom: 0;
+}
+
+.articleedit {
+	position: relative;
+	text-align: right;
+}
+
+.articledelete {
+	display: none;
+}
+
+.articlesave {
+	display: none;
+}
+
+.photodelete {
+	display: none;
+	position: absolute;
+	top: 0;
+	right: 0;
 }
 
 .posttitle {
-	padding: 10px;
 	font-size: 1.2em;
 	font-weight: bold;
+	float: left;
+}
+
+.postdescription {
+	clear: both;
+	padding-top: 10px;
 }
 
 .drophint {
 	display: none;
 	text-align: center;
 	font-weight: bold;
-	padding: 22px;
-	background-color: #eee;
-	margin: 5px;
+	padding: 20px;
+	background-color: rgba(222, 222, 222, 0.8);
 	text-align: center;
+	border-radius: 12px;
+	border: 3px solid #4BC44B;
+	border-style: dashed;
+	margin-bottom: 16px;
 }
 
 .galleria {
@@ -214,35 +234,43 @@ i {
 	cursor: pointer;
 }
 
-h3[contenteditable="true"] {
-	background-color: #00f; /* transparent bg */
-}
-
-[contentEditable=true]:empty:not (:focus ):before {
-	content: attr(data-placeholder)
-}
-
-.deletearticle {
+[contenteditable="true"] {
 	
 }
 
-.deletephoto {
-	display: none;
-	position: absolute;
-	top: 0;
-	right: 0;
+/*empty:not ( :focus ) :*/
+.posttitle[contentEditable=true]:empty:not (:focus ):before {
+	font-style: italic;
+	content: "Post title";
+	color: #aaa;
+}
+
+.postdescription[contentEditable=true]:empty:not (:focus ):before {
+	font-style: italic;
+	content: "Post message";
+	color: #aaa;
+}
+
+[contenteditable="true"]:focus {
+	border: none;
+	outline: none;
 }
 
 .postdate {
-	padding-top: 12px;
+	font-style: italic;
 	border-width: 0;
-	font-family: "Verdana", Sans-serif;
-	font-size: 1em;
+	font-family: inherit;
+	font-size: 1.2em;
+	background-color: inherit;
+	float: right;
+	text-align: right;
 }
 
 .postdate:disabled {
 	color: #000;
-	background-color: #fff;
+	font-family: inherit;
+	font-size: 1.2em;
+	background-color: inherit;
 }
 
 /* tablets, portrait */
@@ -251,8 +279,7 @@ h3[contenteditable="true"] {
 		margin: 0;
 	}
 	article {
-		width: 86%;
-		max-width: auto;
+		width: 97%;
 	}
 }
 
@@ -264,7 +291,6 @@ h3[contenteditable="true"] {
 	article {
 		width: 100%;
 		padding: 0;
-		padding-bottom: 5px;
 		max-width: auto;
 	}
 }

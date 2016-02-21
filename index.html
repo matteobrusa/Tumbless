@@ -3,13 +3,19 @@
 <head>
 <title></title>
 <link rel="stylesheet" href="https://code.jquery.com/ui/1.11.3/themes/smoothness/jquery-ui.css">
-<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
 <link href="tumbless.css" rel="stylesheet" type="text/css" />
+<link href="theme/theme.css" rel="stylesheet" type="text/css" />
+
+<link href='https://fonts.googleapis.com/css?family=Lato:400' rel='stylesheet' type='text/css'>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 </head>
 <body>
-
-	<div id="actions" style="position: absolute; right: 0;">
-		<i id="newPost" class="material-icons" style="">insert photo</i> <i id="publishAction" class="material-icons" style="">publish</i>
+	<div id="actions" style="position: absolute; right: 0; top: 0">
+		<i id="newPost" class="fa fa-plus-square fa-3x actionbutton" style="display:none"></i>
+		<i id="exitAdmin" class="fa fa-sign-out fa-3x actionbutton" style="display:none"></i>
 	</div>
 	<h1 id="title" class="editable" data-placeholder="Blog title"></h1>
 	<div id="description" class="editable" data-placeholder="Blog description"></div>
@@ -20,7 +26,15 @@
 		<div class="horizontal">
 			<div class="vertical">
 				<div style="position: relative">
-					<img id="galleryImage" />
+					<img id="galleryImage"></img>
+
+
+					<div id="closeGallery">
+						<div>
+							Close <i class="fa fa-close fa-inverse"></i>
+						</div>
+					</div>
+
 					<div id="galleryContainer">
 						<div id="galleryDrawer">
 							<div id="galleryList"></div>
@@ -31,7 +45,7 @@
 		</div>
 	</div>
 
-	<div id="loginbox" class="lightbox" style="zoom: 2">
+	<div id="loginbox" class="lightbox" style="zoom: 1.5">
 		<div class="horizontal">
 			<div class="vertical">
 				<div style="background-color: #888; margin: auto; padding: 12px;">
@@ -44,14 +58,14 @@
 		</div>
 	</div>
 
-	<div id="adminbox" class="lightbox" style="zoom: 2">
+	<div id="adminbox" class="lightbox" style="zoom: 1.5">
 		<div class="horizontal">
 			<div class="vertical">
-				<div style="background-color: #888">
+				<div style="background-color: #888; margin: auto; padding: 12px;">
 					<p>
-						<i class="material-icons">lock</i>Admin login
+						<i class="fa fa-lock"></i> Admin login
 					</p>
-					<input id="adminpassword" type="password" placeholder="admin password" /> <br />
+					<input style="margin: 16px" id="adminpassword" type="password" placeholder="admin password" /> <br />
 					<button id="adminbutton" type="button">Let me in!</button>
 					<p id="wrongAdminPassword" style="display: none">wrong password</p>
 				</div>
@@ -62,16 +76,18 @@
 	<div style="display: none">
 
 		<article id="postTemplate">
-			<div style="position: relative;">
-				<div style="position: absolute; right: 0;">
-					<i class="material-icons deletearticle">delete</i>
+			<div style="position: relative; text-align: right;">
+				<div class="articleactions">
+					<i class="fa fa-trash fa-3x actionbutton articledelete "></i> <i class="fa fa-3x fa-pencil-square actionbutton articleedit"></i>
+					<i class="fa fa-3x fa-check-square actionbutton articlesave"></i>
 				</div>
-
-				<header class="posttitle editable"></header>
-				<div class="drophint">Drop your photos here</div>
 				<figure class="mediacontainer" style="text-align: left;"></figure>
 				<figcaption>
-					<input class="postdate" readonly></input>
+					<div class="drophint">
+						Drop your photos here or <br /> <br /> <input type="file" id="fileInput" multiple="multiple" accept="image/jpeg" />
+					</div>
+					<header class="posttitle editable"></header>
+					<input type="text" class="postdate" readonly></input>
 					<p class="postdescription editable"></p>
 				</figcaption>
 
@@ -79,7 +95,7 @@
 		</article>
 
 		<div id="photoTemplate" class="photo">
-			<i class="material-icons deletephoto">delete</i>
+			<i class="fa fa-trash fa-3x actionbutton photodelete"></i>
 		</div>
 
 		<video id="videoTemplate" controls preload="metadata">
@@ -89,7 +105,7 @@
 
 		<div id="thumbnail" class="thumbnail"></div>
 
-		<i id="editIcon" class="material-icons">mode edit</i>
+		<i id="editIcon" class="material-icons">mode edit</i> <i id="spinner" class="fa fa-cog fa-spin fa-4x"></i>
 
 		<canvas id="canvasTemplate" style="max-width: 120px;"></canvas>
 
@@ -97,15 +113,15 @@
 
 	<script type="text/javascript" src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
 	<script type="text/javascript" src="https://code.jquery.com/ui/1.11.3/jquery-ui.min.js"></script>
-	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery.touchswipe/1.6.15/jquery.touchSwipe.min.js"></script>
+
 	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/js-cookie/2.1.0/js.cookie.min.js"></script>
+	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery.touchswipe/1.6.15/jquery.touchSwipe.min.js"></script>
 
 	<script src="https://sdk.amazonaws.com/js/aws-sdk-2.2.34.min.js"></script>
 	<script type="text/javascript" src="s3.js"></script>
 
 	<script type="text/javascript" src="tumbless.js"></script>
 	<script type="text/javascript" src="admin.js"></script>
- 
 
 </body>
 </html>
