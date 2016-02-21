@@ -238,14 +238,14 @@ i {
 	
 }
 
-/*empty:not ( :focus ) :*/
-.posttitle[contentEditable=true]:empty:not (:focus ):before {
+ 
+.posttitle[contentEditable=true]:empty:not(:focus):before {
 	font-style: italic;
 	content: "Post title";
 	color: #aaa;
 }
 
-.postdescription[contentEditable=true]:empty:not (:focus ):before {
+.postdescription[contentEditable=true]:empty:not(:focus):before {
 	font-style: italic;
 	content: "Post message";
 	color: #aaa;
