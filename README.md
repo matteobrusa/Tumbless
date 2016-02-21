@@ -6,6 +6,7 @@
 - Automatic photoset layout
 - Private, password protected blog
 - Fully responsive layout, great for mobile, tablets and desktop
+- image resizing on upload 
 - full screen gallery
 - Password protected admin area
  
@@ -20,19 +21,21 @@ To migrate a tumblr blog to Tumbless you can use this [export tool](https://gith
 
 ## How to setup your Tumbless instance
 ##### 1. Create a bucket on Amazon S3
+Enable Static Website hosting, and set the index document to `index.html`.
+
 ##### 2. Set the CORS permissions as follows, to allow the authenticated admin user to store files:
-  ```xml
-  <?xml version="1.0" encoding="UTF-8"?>
-  <CORSConfiguration xmlns="http://s3.amazonaws.com/doc/2006-03-01/">
-      <CORSRule>
-          <AllowedOrigin>*</AllowedOrigin>
-          <AllowedMethod>PUT</AllowedMethod>
-          <ExposeHeader>ETag</ExposeHeader>
-          <ExposeHeader>x-amz-meta-custom-header</ExposeHeader>
-          <AllowedHeader>*</AllowedHeader>
-      </CORSRule>
-  </CORSConfiguration>
-  ```
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<CORSConfiguration xmlns="http://s3.amazonaws.com/doc/2006-03-01/">
+  <CORSRule>
+      <AllowedOrigin>*</AllowedOrigin>
+      <AllowedMethod>PUT</AllowedMethod>
+      <ExposeHeader>ETag</ExposeHeader>
+      <ExposeHeader>x-amz-meta-custom-header</ExposeHeader>
+      <AllowedHeader>*</AllowedHeader>
+  </CORSRule>
+</CORSConfiguration>
+```
 ##### 3. Set the bucket policy to allow static hosting by default:
 ```json
 {
@@ -62,7 +65,8 @@ Set the admin password by renaming the `admin.json` file to `admin-mysecureadmin
 Rename the `public` folder to `private-mypassword`.
 
 ##### 7. Test your blog
-Upload the files to your bucket, which you can reach the blog at your bucket public endpoint, i.e., `mytumblessblog.com.s3-website.eu-central-1.amazonaws.com`.
+Upload the files to your bucket with S3's web interface (s3cmd does not properly recognize MIME types).
+You can now reach the blog at your bucket public endpoint, i.e., `mytumblessblog.com.s3-website.eu-central-1.amazonaws.com`.
 You can reach the admin page by appending `?admin` to the URL.
 S3 also supports static hosting on **custom domains**, très cool.
 
