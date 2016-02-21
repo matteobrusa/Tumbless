@@ -56,11 +56,13 @@ Save the credentials into the `admin.json` file.
 
 ##### 5. Configure your blog
 Set your blog's title and description in the `config.json` file.
+Set the admin password by renaming the `admin.json` file to `admin-mysecureadminpassword.json`.
 
 ##### 6. [Optional] Make your blog private
 Rename the `public` folder to `private-mypassword`.
 
 ##### 7. Test your blog
 Upload the files to your bucket, which you can reach the blog at your bucket public endpoint, i.e., `mytumblessblog.com.s3-website.eu-central-1.amazonaws.com`.
-S3 also supports static hosting on custom domains, très cool.
+You can reach the admin page by appending `?admin` to the URL.
+S3 also supports static hosting on **custom domains**, très cool.
 
