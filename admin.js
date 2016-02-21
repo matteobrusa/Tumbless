@@ -218,12 +218,16 @@ function putPost(post) {
 	}
 
 	// insert at specific date
-	for (var i = 0; i < posts.length; i++) {
-		var p = posts[i];
-		if (p.date < post.date) {
-			posts.splice(i, 0, post); // insert
-			break;
+	if (posts.length > 0) {
+		for (var i = 0; i < posts.length; i++) {
+			var p = posts[i];
+			if (p.date < post.date) {
+				posts.splice(i, 0, post); // insert
+				break;
+			}
 		}
+	} else {
+		posts.push(post);
 	}
 }
 
