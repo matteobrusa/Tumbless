@@ -54,8 +54,26 @@ Enable Static Website hosting, and set the index document to `index.html`.
 }
 ```
 ##### 4. Create an S3 user with IAM
-Restrict it to S3 usage, `PutObject` action, on your blog bucket.
-Save the credentials into the `admin.json` file.
+Save the bucket name and the credentials into the `admin.json` file.
+
+##### 5. Attach this custom policy to it
+```json
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "Stmt1455229604000",
+            "Effect": "Allow",
+            "Action": [
+                "s3:PutObject"
+            ],
+            "Resource": [
+                "arn:aws:s3:::my-bucket-name/*"
+            ]
+        }
+    ]
+}
+```
 
 ##### 5. Configure your blog
 Set your blog's title and description in the `config.json` file.
