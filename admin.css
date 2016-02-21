@@ -22,3 +22,7 @@ input[type="text"]:focus {
 	border: 1px solid yellow;
 	background-color: yellow;
 }
+
+.fa-cog {
+	    position: absolute;
+}
