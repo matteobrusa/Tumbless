@@ -1,0 +1,27 @@
+body {
+	font-family: 'Lato', sans-serif;
+	background-image: url('grunge_patterns.jpg');
+	background-attachment: fixed;
+	color: #333;
+}
+
+#title {
+	text-align: center;
+	margin-bottom: 5px;
+	margin-top: 2em;
+}
+
+#description {
+	text-align: center;
+	font-size: 1.2em;
+	margin-bottom: 2.2em;
+}
+
+figcaption {
+	padding: 25px;
+	text-align: left;
+}
+
+article {
+	background-image: url(handmadepaper.png);
+}
