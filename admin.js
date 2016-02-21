@@ -28,7 +28,7 @@ function loadAdmin(pwd) {
 			$("#newPost").show();
 			$("#newPost").click(function() {
 				var newpost = newPost();
-				$(".articleedit", newpost).click(editArticle);
+				$(".articleedit", newpost).click(onEditArticle);
 				$(".articleedit", newpost).click();
 			});
 
@@ -39,7 +39,7 @@ function loadAdmin(pwd) {
 
 			$(".articleactions").css("display", "inline-block");
 
-			$(".articleedit").click(editArticle);
+			$(".articleedit").click(onEditArticle);
 
 		},
 		error : function(xhr, ajaxOptions, thrownError) {
@@ -51,8 +51,11 @@ function loadAdmin(pwd) {
 	});
 }
 
-function editArticle(event) {
-	var article = $(event.target).parents("article");
+function onEditArticle(event) {
+	editArticle($(event.target).parents("article"));
+}
+
+function editArticle(article) {
 
 	$(".postdate", article).datepicker("enable");
 	$(".editable", article).attr("contenteditable", "true");
@@ -223,12 +226,12 @@ function putPost(post) {
 			var p = posts[i];
 			if (p.date < post.date) {
 				posts.splice(i, 0, post); // insert
-				break;
+				return;
 			}
 		}
-	} else {
-		posts.push(post);
 	}
+
+	posts.unshift(post);
 }
 
 function delPost(postId) {
@@ -291,6 +294,7 @@ function processImage(src, article, imgSize) {
 
 	scaleAndUploadImage(src, article, imgSize, photoQ, PREFIX_IMAGES, onImageScaled, onImageUploaded);
 	scaleAndUploadImage(src, null, thumbSize, thumbQ, PREFIX_THUMBNAILS, null, null);
+
 }
 
 function onImageScaled(article, data) {
@@ -301,6 +305,12 @@ function onImageScaled(article, data) {
 	// for the time being inline image, will replace upon upload
 	photo.css("background-image", "url(" + data + ")");
 	photo.attr("data-src", data);
+
+	// add the remove listener
+	$(".photodelete", photo).show();
+	$(".photodelete", photo).click(function() {
+		deleteImage($(this));
+	});
 
 	doLayout($(".mediacontainer", article));
 
