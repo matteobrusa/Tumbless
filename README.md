@@ -4,6 +4,7 @@
 ## Features
 - Infinite scrolling
 - Automatic photoset layout
+- Video posts (mp4)
 - Private, password protected blog
 - Fully responsive layout, great for mobile, tablets and desktop
 - image resizing on upload 
@@ -13,7 +14,6 @@
  
 ## What doesn't work yet
 - Post media from url
-- Video posts
 - Themes support
 
 ## Migrate from Tumblr to your Tumbless instance
