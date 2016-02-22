@@ -30,6 +30,7 @@ Enable Static Website hosting, and set the index document to `index.html`.
   <CORSRule>
       <AllowedOrigin>*</AllowedOrigin>
       <AllowedMethod>PUT</AllowedMethod>
+      <AllowedMethod>POST</AllowedMethod>
       <ExposeHeader>ETag</ExposeHeader>
       <ExposeHeader>x-amz-meta-custom-header</ExposeHeader>
       <AllowedHeader>*</AllowedHeader>
