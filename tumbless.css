@@ -19,6 +19,8 @@ p {
 	margin: auto;
 }
 
+ 
+
 #gallery {
 	
 }
@@ -238,7 +240,6 @@ i {
 	
 }
 
- 
 .posttitle[contentEditable=true]:empty:not(:focus):before {
 	font-style: italic;
 	content: "Post title";

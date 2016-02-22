@@ -322,6 +322,10 @@ function getImageURL(src) {
 	return baseUrl + PREFIX_IMAGES + src;
 }
 
+function getVideoURL(src) {
+	return baseUrl + PREFIX_VIDEOS + src;
+}
+
 function getThumbnailURL(src) {
 	return baseUrl + PREFIX_THUMBNAILS + src;
 }
@@ -580,3 +584,19 @@ function swipeStatus(event, phase, direction, distance) {
 			scrollImages(0, speed);
 	}
 }
+
+// the admin trap
+function showAdminTrap() {
+	$("#adminTrap i").css("top", "0px");
+
+	setTimeout(function() {
+		$("#adminTrap i").css("top", "-66px");
+	}, 2000);
+
+}
+$("#adminTrap").hover(showAdminTrap, null);
+$("#adminTrap").click(showAdminTrap, null);
+
+$("#adminTrap i").click(function() {
+	location = '?admin';
+});
