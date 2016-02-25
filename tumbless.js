@@ -164,8 +164,8 @@ function addPost(post) {
 
 			var singlePhoto = urls.length == 1;
 
-			if (singlePhoto)
-				div.css("float", "none");
+			// if (singlePhoto)
+			// div.css("float", "none");
 
 			if (index > 0)
 				setPhotoSrc(div, url);
@@ -228,6 +228,8 @@ function convertToFirstimage(div, mediacontainer) {
 }
 
 function layoutPhotoset(divs, w, h) {
+
+	$(divs[0]).css("float", divs.length == 1 ? "none" : "left");
 
 	var aspect = w * 0.995 / h;
 	var a, c;
