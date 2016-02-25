@@ -25,10 +25,12 @@ function loadAdmin(pwd) {
 
 			testS3();
 
+			$("#adminTrap").remove();
+
 			$("#newPost").show();
 			$("#newPost").click(function() {
 				var newpost = newPost();
-				$(".articleedit", newpost).click(editArticle);
+				$(".articleedit", newpost).click(onEditArticle);
 				$(".articleedit", newpost).click();
 			});
 
@@ -39,7 +41,7 @@ function loadAdmin(pwd) {
 
 			$(".articleactions").css("display", "inline-block");
 
-			$(".articleedit").click(editArticle);
+			$(".articleedit").click(onEditArticle);
 
 		},
 		error : function(xhr, ajaxOptions, thrownError) {
@@ -51,8 +53,11 @@ function loadAdmin(pwd) {
 	});
 }
 
-function editArticle(event) {
-	var article = $(event.target).parents("article");
+function onEditArticle(event) {
+	editArticle($(event.target).parents("article"));
+}
+
+function editArticle(article) {
 
 	$(".postdate", article).datepicker("enable");
 	$(".editable", article).attr("contenteditable", "true");
@@ -110,7 +115,13 @@ function confirmEdit(el) {
 	var articleId = article.attr("id");
 
 	if (articleId) {
-		buildAndStorePost(articleId, article);
+
+		var v = $("video", article)[0];
+		if (v)
+			buildAndStoreVideoPost(articleId, article);
+		else
+			buildAndStorePhotoPost(articleId, article);
+
 	}
 }
 
@@ -165,7 +176,31 @@ function layoutAgainPhotoset(article) {
 	doLayout(mc);
 }
 
-function buildAndStorePost(articleId, article) {
+function buildAndStoreVideoPost(articleId, article) {
+	var post = {};
+	post["id"] = articleId;
+	post["title"] = $("header", article)[0].innerHTML;
+	post["date"] = dateToTimestamp($(".postdate", article)[0].value);
+	post["description"] = $("p", article)[0].innerHTML;
+	post["type"] = "video";
+
+	var placeholder = $(".mediacontainer", article).attr("data-preview");
+	var url = $(".mediacontainer", article).attr("data-video");
+
+	post["url"] = url;
+	post["placeholder"] = placeholder;
+
+	// update the big list
+	putPost(post);
+
+	console.log("added post " + post);
+
+	uploadPosts(function() {
+		console.log("saved posts");
+	});
+}
+
+function buildAndStorePhotoPost(articleId, article) {
 	var post = {};
 	post["id"] = articleId;
 	post["title"] = $("header", article)[0].innerHTML;
@@ -218,13 +253,17 @@ function putPost(post) {
 	}
 
 	// insert at specific date
-	for (var i = 0; i < posts.length; i++) {
-		var p = posts[i];
-		if (p.date < post.date) {
-			posts.splice(i, 0, post); // insert
-			break;
+	if (posts.length > 0) {
+		for (var i = 0; i < posts.length; i++) {
+			var p = posts[i];
+			if (p.date < post.date) {
+				posts.splice(i, 0, post); // insert
+				return;
+			}
 		}
 	}
+
+	posts.unshift(post);
 }
 
 function delPost(postId) {
@@ -287,6 +326,7 @@ function processImage(src, article, imgSize) {
 
 	scaleAndUploadImage(src, article, imgSize, photoQ, PREFIX_IMAGES, onImageScaled, onImageUploaded);
 	scaleAndUploadImage(src, null, thumbSize, thumbQ, PREFIX_THUMBNAILS, null, null);
+
 }
 
 function onImageScaled(article, data) {
@@ -297,6 +337,12 @@ function onImageScaled(article, data) {
 	// for the time being inline image, will replace upon upload
 	photo.css("background-image", "url(" + data + ")");
 	photo.attr("data-src", data);
+
+	// add the remove listener
+	$(".photodelete", photo).show();
+	$(".photodelete", photo).click(function() {
+		deleteImage($(this));
+	});
 
 	doLayout($(".mediacontainer", article));
 
@@ -415,7 +461,97 @@ function dataURItoBlob(dataURI) {
  */
 
 function processVideo(file, article) {
-	uploadVideo(file.name, file.type, file, null);
+	showBusyUploading(article, true);
+	grabVideoScreenshot(file, article);
+
+}
+
+function grabVideoScreenshot(file, article) {
+
+	var preview = file.name.substring(0, file.name.lastIndexOf('.')) + ".jpg";
+
+	var reader = new FileReader();
+	reader.onload = function(e) {
+
+		var videoData = e.target.result;
+
+		// var source = $("#videoVideo source");
+		// source.attr("src", e.target.result);
+
+		// var video = $("#videoVideo")[0];
+		var jQvideo = $("<video>");
+		jQvideo.attr("autoplay", "true");
+
+		var jQsource = $("<source>");
+		jQvideo.append(jQsource);
+		jQsource.attr("src", videoData);
+
+		var video = jQvideo[0];
+
+		// var canvas = $("#videoCanvas")[0];
+		var canvas = $("<canvas>")[0];
+
+		var context = canvas.getContext('2d');
+
+		var w, h;
+
+		video.addEventListener('playing', function() {
+
+			w = video.videoWidth;
+			h = video.videoHeight;
+
+			canvas.width = w;
+			canvas.height = h;
+
+			setTimeout(function() {
+				context.fillRect(0, 0, w, h);
+				context.drawImage(video, 0, 0, w, h);
+
+				// stop video and release resources
+				video.pause();
+				var source = $("#videoVideo source");
+				source.attr("src", null);
+
+				var previewData = canvas.toDataURL("image/jpeg", photoQ);
+				var blob = dataURItoBlob(previewData);
+
+				// upload to s3
+				console.log("uploading preview " + preview);
+				uploadImage(PREFIX_IMAGES, preview, blob, function() {
+
+					console.log("uploading video " + file.name);
+
+					var el = getTemplate("#videoTemplate");
+					el.attr("poster", previewData);
+					var mediacontainer = $(".mediacontainer", article);
+					mediacontainer.append(el);
+
+					uploadVideo(file.name, file.type, file, function() {
+						showBusyUploading(article, false);
+
+						$(".src", el).attr("src", videoData);
+
+						mediacontainer.attr("data-video", file.name);
+						mediacontainer.attr("data-preview", preview);
+					});
+				});
+			}, 1000);
+		}, false);
+
+		video.load();
+	};
+	reader.readAsDataURL(file);
+
+}
+
+function showBusyUploading(article, show) {
+	if (show) {
+		$(".uploading", article).show();
+		$(".drophere", article).hide();
+	} else {
+		$(".uploading", article).hide();
+		$(".drophere", article).show();
+	}
 }
 
 /* drag and rop */
