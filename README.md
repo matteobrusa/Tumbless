@@ -1,6 +1,11 @@
 # Tumbless
 *A Tumblr-like blogging platform living in Amazon S3 (and your browser)*
 
+## Demo page
+Here's a read only [demo page](https://matteobrusa.github.io/Tumbless/). Hover in the top right corner or jump [here](https://matteobrusa.github.io/Tumbless/?admin) to access the admin interface with password `qwerty123`. 
+No real S3 bucket is associated with this demo, so no upload/edit feature will work.
+
+
 ## Features
 - Infinite scrolling
 - Automatic photoset layout
