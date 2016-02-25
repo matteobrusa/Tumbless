@@ -284,15 +284,6 @@ function delPost(postId) {
 
 // UI
 
-function addSpinner(div) {
-	var spinner = getTemplate("#spinner");
-	div.append(spinner);
-}
-
-function removeSpinner(div) {
-	$("i.fa.fa-cog.fa-spin.fa-4x", div).remove();
-}
-
 function recreateThumbnails() {
 	$.each(posts, function(index, post) {
 		if (post.urls) {
@@ -322,17 +313,19 @@ function recreateThumbnails() {
 
 function processImage(src, article, imgSize) {
 
+	showBusy(article, true);
+	showBusy(article, true);// for the busy counter
+	
 	// generate photo and thumbnail
-
 	scaleAndUploadImage(src, article, imgSize, photoQ, PREFIX_IMAGES, onImageScaled, onImageUploaded);
-	scaleAndUploadImage(src, null, thumbSize, thumbQ, PREFIX_THUMBNAILS, null, null);
+	scaleAndUploadImage(src, article, thumbSize, thumbQ, PREFIX_THUMBNAILS, null, null);
 
 }
 
 function onImageScaled(article, data) {
 	var photo = getTemplate("#photoTemplate");
 	$("figure", article).append(photo);
-	addSpinner(photo);
+//	addSpinner(photo);
 
 	// for the time being inline image, will replace upon upload
 	photo.css("background-image", "url(" + data + ")");
@@ -351,7 +344,7 @@ function onImageScaled(article, data) {
 
 function onImageUploaded(photo, filename) {
 
-	removeSpinner(photo);
+//	removeSpinner(photo);
 
 	// replace inlined image with proper source, to make gallery work
 	photo.attr("data-src", filename);
@@ -416,12 +409,16 @@ function scaleAndUploadImageFromUrl(url, article, imgSize, imgQuality, pathPrefi
 
 			console.log("uploaded " + pathPrefix + filename);
 
-			// callback
+			showBusy(article, false);
+			
+			// callback after upload
 			if (cbImageUploaded)
 				cbImageUploaded(photo, filename);
 		});
 
-		// callback, photo might be null
+		
+		
+		// callback after scale, photo might be null
 		if (cbImageScaled)
 			var photo = cbImageScaled(article, data);
 	};
@@ -461,7 +458,7 @@ function dataURItoBlob(dataURI) {
  */
 
 function processVideo(file, article) {
-	showBusyUploading(article, true);
+	showBusy(article, true);
 	grabVideoScreenshot(file, article);
 
 }
@@ -527,7 +524,7 @@ function grabVideoScreenshot(file, article) {
 					mediacontainer.append(el);
 
 					uploadVideo(file.name, file.type, file, function() {
-						showBusyUploading(article, false);
+						showBusy(article, false);
 
 						$(".src", el).attr("src", videoData);
 
@@ -544,13 +541,22 @@ function grabVideoScreenshot(file, article) {
 
 }
 
-function showBusyUploading(article, show) {
+var busyCounter = 0;
+
+function showBusy(article, show) {
 	if (show) {
-		$(".uploading", article).show();
-		$(".drophere", article).hide();
+		if (busyCounter == 0) {
+			$(".uploading", article).show();
+			$(".drophere", article).hide();
+		}
+		busyCounter++;
+
 	} else {
-		$(".uploading", article).hide();
-		$(".drophere", article).show();
+		busyCounter--;
+		if (busyCounter == 0) {
+			$(".uploading", article).hide();
+			$(".drophere", article).show();
+		}
 	}
 }
 
