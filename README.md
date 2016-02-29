@@ -1,28 +1,36 @@
 # Tumbless
-*A Tumblr-like blogging platform living in Amazon S3 (and your browser)*
-
-## Demo page
-Here's a read only [demo page](https://matteobrusa.github.io/Tumbless/). Hover in the top right corner or jump [here](https://matteobrusa.github.io/Tumbless/?admin) to access the admin interface with password `qwerty123`. 
-No real S3 bucket is associated with this demo, so no upload/edit feature will work.
-
+*A Tumblr-like blogging platform living in Amazon S3 (and your browser).*
 
 ## Features
-- Infinite scrolling
-- Automatic photoset layout
-- Video posts (mp4)
-- Private, password protected blog
+Tumbless leverages the capabilities of HTML5 and Amazon S3 to offer a blogging platform without a specialized backend.
+- You can create posts with photos and video 
 - Fully responsive layout, great for mobile, tablets and desktop
-- image resizing on upload 
-- full screen gallery
-- Password protected admin area
- 
+- Infinite scrolling
+- Automatic photoset layout: photos are arranged automatically according to aspect ratio and number
+- Full screen gallery
+- Password protected, mobile friendly admin area
+- `optional` Private, password protected blog
+
+Follow the instructions below to setup your own Tumbless instance.
+
+## How it works
+S3 offers pretty good static hosting and a full set of REST APIs to manage and upload content directly from the browser.   
+Your HTML5 capable browser takes care of:
+- photo scaling on upload
+- posts management from a JSON object (no need for a DB)
+- Video (mp4) upload and thumbnailing posts
+
+## Demo page
+Here's a simple, read only [demo page](https://matteobrusa.github.io/Tumbless/). Hover in the top right corner or jump [here](https://matteobrusa.github.io/Tumbless/?admin) to access the admin interface with password `qwerty123`. 
+No real S3 bucket is associated with this demo, so upload/edit will not work.
  
 ## What doesn't work yet
 - Post media from url
 - Themes support
+- Disqus commenting 
 
 ## Migrate from Tumblr to your Tumbless instance
-To migrate a tumblr blog to Tumbless you can use this [export tool](https://github.com/matteobrusa/TumblrToStaticExporter).
+To migrate a tumblr blog to Tumbless you can use this [export script](https://github.com/matteobrusa/TumblrToStaticExporter).
 
 ## How to setup your Tumbless instance
 ##### 1. Create a bucket on Amazon S3
@@ -93,4 +101,6 @@ Upload the files to your bucket with S3's web interface (s3cmd does not properly
 You can now reach the blog at your bucket public endpoint, i.e., `mytumblessblog.com.s3-website.eu-central-1.amazonaws.com`.
 You can reach the admin page by appending `?admin` to the URL.
 S3 also supports static hosting on **custom domains**, très cool.
+
+**If you've read so far, I'd like to hear your feedback. Pull reqs are welcome.**
 
