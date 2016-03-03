@@ -52,7 +52,9 @@ function loadPosts() {
 
 				// fill the post list
 				for (actualcount = 0; actualcount < startcount; actualcount++) {
-					addPost(posts[actualcount]);
+					var post = posts[actualcount];
+
+					addPost(post);
 				}
 			}
 
@@ -142,6 +144,13 @@ function addPost(post) {
 	$(".postdate", template).datepicker();
 	$(".postdate", template).datepicker("setDate", d);
 	$(".postdate", template).datepicker("disable");
+
+	if (post.draft) { // hide drafts by default
+		template.attr("data-draft", true);
+		template.hide();
+		$("input[type=checkbox]", template)[0].checked = true;
+		$(".draftwatermark", template).show();
+	}
 
 	var mediacontainer = $(".mediacontainer", template);
 

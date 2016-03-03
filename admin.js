@@ -6,6 +6,9 @@ function loadAdmin(pwd) {
 
 	// recreateThumbnails();
 
+	// show all drafts
+	$("article[data-draft=true]").show();
+
 	var url = baseUrl + "admin-" + pwd + ".json";
 
 	$.ajax({
@@ -66,7 +69,7 @@ function editArticle(article) {
 	$(".articleedit", article).hide();
 
 	$(".articlesave", article).show();
-
+	$(".articlesave", article).unbind("click");
 	$(".articlesave").click(function(event) {
 
 		// save here
@@ -80,6 +83,10 @@ function editArticle(article) {
 		$(".editable", article).attr("contenteditable", "false");
 		$(".postdate", article).datepicker("disable");
 		$(".photodelete", article).hide();
+
+		$(".drafttoggle", article).hide();
+		if ($("input[type=checkbox]", article)[0].checked)
+			$(".draftwatermark", article).show();
 
 	});
 
@@ -100,6 +107,9 @@ function editArticle(article) {
 		startFileUpload($(this));
 	});
 
+	$(".drafttoggle", article).show();
+	$(".draftwatermark", article).hide();
+
 	bindDropArea(article[0]);
 }
 
@@ -116,12 +126,13 @@ function confirmEdit(el) {
 
 	if (articleId) {
 
+		var post = buildPost(articleId, article);
+
 		var v = $("video", article)[0];
 		if (v)
-			buildAndStoreVideoPost(articleId, article);
+			buildAndStoreVideoPost(post, article);
 		else
-			buildAndStorePhotoPost(articleId, article);
-
+			buildAndStorePhotoPost(post, article);
 	}
 }
 
@@ -176,12 +187,21 @@ function layoutAgainPhotoset(article) {
 	doLayout(mc);
 }
 
-function buildAndStoreVideoPost(articleId, article) {
+function buildPost(articleId, article) {
 	var post = {};
 	post["id"] = articleId;
 	post["title"] = $("header", article)[0].innerHTML;
 	post["date"] = dateToTimestamp($(".postdate", article)[0].value);
 	post["description"] = $("p", article)[0].innerHTML;
+
+	if ($(".drafttoggle input", article)[0].checked)
+		post["draft"] = true;
+
+	return post;
+}
+
+function buildAndStoreVideoPost(post, article) {
+
 	post["type"] = "video";
 
 	var placeholder = $(".mediacontainer", article).attr("data-preview");
@@ -200,12 +220,8 @@ function buildAndStoreVideoPost(articleId, article) {
 	});
 }
 
-function buildAndStorePhotoPost(articleId, article) {
-	var post = {};
-	post["id"] = articleId;
-	post["title"] = $("header", article)[0].innerHTML;
-	post["date"] = dateToTimestamp($(".postdate", article)[0].value);
-	post["description"] = $("p", article)[0].innerHTML;
+function buildAndStorePhotoPost(post, article) {
+
 	post["type"] = "photoset";
 
 	var urls = [];
@@ -315,17 +331,26 @@ function processImage(src, article, imgSize) {
 
 	showBusy(article, true);
 	showBusy(article, true);// for the busy counter
-	
+
 	// generate photo and thumbnail
 	scaleAndUploadImage(src, article, imgSize, photoQ, PREFIX_IMAGES, onImageScaled, onImageUploaded);
 	scaleAndUploadImage(src, article, thumbSize, thumbQ, PREFIX_THUMBNAILS, null, null);
+
+	EXIF.getData(src, function() {
+		var dt = EXIF.getTag(this, "DateTimeOriginal");
+
+		var a = dt.replace(" ", ":").split(":");
+
+		var d = new Date(a[0], a[1]-1, a[2], a[3], a[4], a[5], 0);
+		$(".postdate", article).datepicker("setDate", d);
+	});
 
 }
 
 function onImageScaled(article, data) {
 	var photo = getTemplate("#photoTemplate");
 	$("figure", article).append(photo);
-//	addSpinner(photo);
+	// addSpinner(photo);
 
 	// for the time being inline image, will replace upon upload
 	photo.css("background-image", "url(" + data + ")");
@@ -344,7 +369,7 @@ function onImageScaled(article, data) {
 
 function onImageUploaded(photo, filename) {
 
-//	removeSpinner(photo);
+	// removeSpinner(photo);
 
 	// replace inlined image with proper source, to make gallery work
 	photo.attr("data-src", filename);
@@ -410,14 +435,12 @@ function scaleAndUploadImageFromUrl(url, article, imgSize, imgQuality, pathPrefi
 			console.log("uploaded " + pathPrefix + filename);
 
 			showBusy(article, false);
-			
+
 			// callback after upload
 			if (cbImageUploaded)
 				cbImageUploaded(photo, filename);
 		});
 
-		
-		
 		// callback after scale, photo might be null
 		if (cbImageScaled)
 			var photo = cbImageScaled(article, data);

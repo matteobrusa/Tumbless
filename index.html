@@ -13,25 +13,18 @@
 
 </head>
 <body>
-	<div id="actions" style="position: absolute; right: 0; top: 0">
+	<div id="actions" style="position: fixed; right: 0; top: 0">
 		<i id="newPost" class="fa fa-plus-square fa-3x actionbutton" style="display: none"></i> <i id="exitAdmin"
 			class="fa fa-sign-out fa-3x actionbutton" style="display: none"></i>
 	</div>
-	<div id="adminTrap" style="position: absolute; right: 0; top: 0">
+	<div id="adminTrap" style="position: fixed; right: 0; top: 0">
 		<i id="newPost" class="fa fa-pencil-square fa-3x actionbutton"
 			style="position: relative; top: -66px; transition: all 0.2s ease 0s;"></i>
 	</div>
 	<h1 id="title" class="editable" data-placeholder="Blog title"></h1>
 	<div id="description" class="editable" data-placeholder="Blog description"></div>
 
-	<!--  
-	<div id="videoGrabber">
-		<canvas id="videoCanvas"></canvas>
-		<video id="videoVideo" autoplay>
-			<source type="video/mp4">
-		</video>
-	</div>
--->
+
 	<div id="posts"></div>
 
 	<div id="gallery" class="lightbox">
@@ -107,7 +100,10 @@
 					<input type="text" class="postdate" readonly></input>
 					<p class="postdescription editable"></p>
 				</figcaption>
-
+				<div class="drafttoggle">
+					<label><input type="checkbox" style="transform: scale(1.5);"> Save as draft</label>
+				</div>
+				<div class="draftwatermark">Draft</div>
 			</div>
 		</article>
 
@@ -139,6 +135,7 @@
 
 	<script type="text/javascript" src="tumbless.js"></script>
 	<script type="text/javascript" src="admin.js"></script>
+	<script type="text/javascript" src="exif.js"></script>
 
 </body>
 </html>

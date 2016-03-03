@@ -19,8 +19,6 @@ p {
 	margin: auto;
 }
 
- 
-
 #gallery {
 	
 }
@@ -178,6 +176,27 @@ article {
 	right: 0em;
 	z-index: 1234;
 	bottom: 0;
+}
+
+.drafttoggle {
+	display: none;
+	text-align: left;
+	padding: 25px;
+	font-size: 1.1em;
+}
+
+.draftwatermark {
+	display: none;
+	position: absolute;
+	opacity: 0.7;
+	width: 100%;
+	text-align: center;
+	top: 25%;
+	z-index: 1000;
+	color: #b00;
+	font-weight: bolder;
+	font-size: 12em;
+	transform: rotate(-17deg);
 }
 
 .articleedit {
