@@ -4,6 +4,8 @@ var s3region, s3bucket, photoSize = 1600, thumbSize = 640, photoQ = 0.85, thumbQ
 
 function loadAdmin(pwd) {
 
+	
+
 	// recreateThumbnails();
 
 	// show all drafts
@@ -15,6 +17,8 @@ function loadAdmin(pwd) {
 		url : url,
 		dataType : "json",
 		success : function(data) {
+			
+			isAdmin = true;
 
 			if (data.photoSize)
 				photoSize = data.photoSize;
@@ -294,8 +298,6 @@ function delPost(postId) {
 			return;
 		}
 	}
-
-	posts.unshift(post);
 }
 
 // UI
@@ -341,7 +343,7 @@ function processImage(src, article, imgSize) {
 
 		var a = dt.replace(" ", ":").split(":");
 
-		var d = new Date(a[0], a[1]-1, a[2], a[3], a[4], a[5], 0);
+		var d = new Date(a[0], a[1] - 1, a[2], a[3], a[4], a[5], 0);
 		$(".postdate", article).datepicker("setDate", d);
 	});
 

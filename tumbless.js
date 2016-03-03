@@ -8,6 +8,7 @@ var PREFIX_IMAGES = "images/";
 var PREFIX_THUMBNAILS = "thumbnails/";
 var PREFIX_VIDEOS = "videos/";
 var galleryIndex, galleryList;
+var isAdmin = false;
 
 //
 // load the config
@@ -147,9 +148,14 @@ function addPost(post) {
 
 	if (post.draft) { // hide drafts by default
 		template.attr("data-draft", true);
-		template.hide();
 		$("input[type=checkbox]", template)[0].checked = true;
 		$(".draftwatermark", template).show();
+
+		if (!isAdmin)
+			template.hide();
+		else {
+			$(".articleedit", template).click(onEditArticle);
+		}
 	}
 
 	var mediacontainer = $(".mediacontainer", template);
@@ -395,8 +401,11 @@ window.addEventListener("scroll", function() {
 		{
 			if (actualcount == posts.length)
 				console.log("no more posts");
-			else
-				addPost(posts[actualcount++]);
+			else {
+				var post = posts[actualcount++];
+				addPost(post);
+
+			}
 		}
 	}
 });

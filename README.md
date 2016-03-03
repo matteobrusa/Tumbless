@@ -10,6 +10,8 @@ Tumbless leverages the capabilities of HTML5 and Amazon S3 to offer a blogging p
 - Full screen gallery
 - Password protected, mobile friendly admin area
 - `optional` Private, password protected blog
+- Save draft posts
+- Automatically set the post date based on the photo's EXIF data, if any
 
 Follow the instructions below to setup your own Tumbless instance.
 
