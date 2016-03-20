@@ -249,7 +249,11 @@ function layoutPhotoset(divs, w, h) {
 	var aspect = w * 0.995 / h;
 	var a, c;
 
-	if (aspect > 1 && (divs.length % 3 == 1)) {
+	if (divs.length == 1) {
+
+//		divs.css("width", "100%");
+
+	} else if (aspect > 1 && (divs.length % 3 == 1)) {
 		divs.each(function(index, el) {
 			el = $(el);
 			if (index == 0)
