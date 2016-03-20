@@ -123,14 +123,14 @@ figure {
 	vertical-align: top;
 }
 
-.firstImage {
+.firstimage {
 	float: left;
 	width: 100%;
 	background-size: contain;
 	padding: 0;
 }
 
-.firstImageImg {
+.firstimageimg {
 	padding: 0;
 	width: 100%;
 }
@@ -216,6 +216,20 @@ article {
 	display: none;
 	position: absolute;
 	top: 0;
+	right: 0;
+}
+
+.photomove {
+	display: none;
+	position: absolute;
+	bottom: 0;
+}
+
+.photomoveleft {
+	left: 0;
+}
+
+.photomoveright {
 	right: 0;
 }
 

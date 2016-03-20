@@ -183,7 +183,7 @@ function addPost(post) {
 			// div.css("float", "none");
 
 			if (index > 0)
-				setPhotoSrc(div, url);
+				setBackgroundImage(div, url);
 
 			div.attr("data-src", url);
 			setGalleryEvent(div, singlePhoto ? null : post.urls);
@@ -223,7 +223,7 @@ function convertToFirstimage(div, mediacontainer) {
 		return;
 
 	// get the first to calc the layout
-	div.addClass("firstImage");
+	div.addClass("firstimage");
 	var img = $("<img>");
 	img.appendTo(div);
 
@@ -234,7 +234,7 @@ function convertToFirstimage(div, mediacontainer) {
 		var h = this.height;
 		var photos = $(".photo", mediacontainer);
 		layoutPhotoset(photos, w, h)
-		img.addClass("firstImageImg");
+		img.addClass("firstimageimg");
 	});
 
 	if (!url.startsWith("data:image"))
@@ -244,14 +244,12 @@ function convertToFirstimage(div, mediacontainer) {
 
 function layoutPhotoset(divs, w, h) {
 
-	$(divs[0]).css("float", divs.length == 1 ? "none" : "left");
-
 	var aspect = w * 0.995 / h;
 	var a, c;
 
 	if (divs.length == 1) {
 
-//		divs.css("width", "100%");
+		$(divs[0]).css("float", "none");
 
 	} else if (aspect > 1 && (divs.length % 3 == 1)) {
 		divs.each(function(index, el) {
@@ -270,9 +268,9 @@ function layoutPhotoset(divs, w, h) {
 		var url = first.attr("data-src");
 
 		img.hide();
-		first.removeClass("firstImage");
+		first.removeClass("firstimage");
 
-		setPhotoSrc(first, url);
+		setBackgroundImage(first, url);
 
 		divs.css("width", "50%");
 		divs.css("padding-bottom", "50%");
@@ -331,7 +329,7 @@ function layoutPhotoset(divs, w, h) {
 
 }
 
-function setPhotoSrc(div, src) {
+function setBackgroundImage(div, src) {
 
 	if (!src.startsWith("data:image"))
 		src = getThumbnailURL(src);
@@ -507,16 +505,25 @@ $(document).keydown(function(e) {
 function previousImage() {
 	console.log("previous");
 	var gi = Math.max(galleryIndex - 1, 0);
-
-	$('#galleryImage').css("transform", "translate(0px,0)");
-	showGallery(galleryList[gi], galleryList);
+	if (gi == galleryIndex) {
+		scrollImages(0, speed);
+		$("#gallery").fadeOut(100);
+	} else {
+		$('#galleryImage').css("transform", "translate(0px,0)");
+		showGallery(galleryList[gi], galleryList);
+	}
 }
 
 function nextImage() {
 	console.log("next");
 	var gi = Math.min(galleryIndex + 1, galleryList.length - 1);
-	$('#galleryImage').css("transform", "translate(0px,0)");
-	showGallery(galleryList[gi], galleryList);
+	if (gi == galleryIndex) {
+		scrollImages(0, speed);
+		$("#gallery").fadeOut(100);
+	} else {
+		$('#galleryImage').css("transform", "translate(0px,0)");
+		showGallery(galleryList[gi], galleryList);
+	}
 }
 
 function showGalleryDrawer() {

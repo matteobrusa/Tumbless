@@ -4,8 +4,6 @@ var s3region, s3bucket, photoSize = 1600, thumbSize = 640, photoQ = 0.85, thumbQ
 
 function loadAdmin(pwd) {
 
-	
-
 	// recreateThumbnails();
 
 	// show all drafts
@@ -17,7 +15,7 @@ function loadAdmin(pwd) {
 		url : url,
 		dataType : "json",
 		success : function(data) {
-			
+
 			isAdmin = true;
 
 			if (data.photoSize)
@@ -49,6 +47,9 @@ function loadAdmin(pwd) {
 			$(".articleactions").css("display", "inline-block");
 
 			$(".articleedit").click(onEditArticle);
+
+			// remove gallery
+			$(".photo").unbind("click");
 
 		},
 		error : function(xhr, ajaxOptions, thrownError) {
@@ -87,6 +88,7 @@ function editArticle(article) {
 		$(".editable", article).attr("contenteditable", "false");
 		$(".postdate", article).datepicker("disable");
 		$(".photodelete", article).hide();
+		$(".photomove", article).hide();
 
 		$(".drafttoggle", article).hide();
 		if ($("input[type=checkbox]", article)[0].checked)
@@ -98,6 +100,15 @@ function editArticle(article) {
 	$(".photodelete", article).unbind("click");
 	$(".photodelete", article).click(function() {
 		deleteImage($(this));
+	});
+
+	$(".photomove", article).show();
+	$(".photomove", article).unbind("click");
+	$(".photomoveleft", article).click(function(e) {
+		moveImageLeft($(this));
+	});
+	$(".photomoveright", article).click(function(e) {
+		moveImageRight($(this));
 	});
 
 	$(".articledelete", article).show();
@@ -185,9 +196,49 @@ function deleteImage(i) {
 	}
 }
 
+function moveImageLeft(i) {
+
+	var article = i.parents("article");
+	var articleId = article.attr("id");
+
+	if (articleId) {
+		var div = i.parent();
+		var prev = div.prev();
+		if (prev)
+			div.insertBefore(prev);
+
+		layoutAgainPhotoset(article);
+
+	}
+}
+
+function moveImageRight(i) {
+
+	var article = i.parents("article");
+	var articleId = article.attr("id");
+
+	if (articleId) {
+		var div = i.parent();
+		var next = div.next();
+		if (next)
+			div.insertAfter(next);
+		layoutAgainPhotoset(article);
+	}
+}
+
 function layoutAgainPhotoset(article) {
 
 	var mc = $(".mediacontainer", article);
+
+	$.each($(".photo", article), function(index, div) {
+		if (index > 0) {
+			div = $(div);
+			var src = div.attr("data-src");
+			setBackgroundImage(div, src);
+			div.removeClass("firstimage");
+		}
+	});
+
 	doLayout(mc);
 }
 
