@@ -3,7 +3,7 @@
 
 ## Features
 Tumbless leverages the capabilities of HTML5 and Amazon S3 to offer a blogging platform without a specialized backend.
-- You can create posts with photos and video 
+- You can create posts with photos and video
 - Fully responsive layout, great for mobile, tablets and desktop
 - Infinite scrolling
 - Automatic photoset layout: photos are arranged automatically according to aspect ratio and number
@@ -16,20 +16,20 @@ Tumbless leverages the capabilities of HTML5 and Amazon S3 to offer a blogging p
 Follow the instructions below to setup your own Tumbless instance.
 
 ## How it works
-S3 offers pretty good static hosting and a full set of REST APIs to manage and upload content directly from the browser.   
+S3 offers pretty good static hosting and a full set of REST APIs to manage and upload content directly from the browser.
 Your HTML5 capable browser takes care of:
 - photo scaling on upload
 - posts management from a JSON object (no need for a DB)
 - Video (mp4) upload and thumbnailing posts
 
 ## Demo page
-Here's a simple, read only [demo page](https://matteobrusa.github.io/Tumbless/). Hover in the top right corner or jump [here](https://matteobrusa.github.io/Tumbless/?admin) to access the admin interface with password `qwerty123`. 
+Here's a simple, read only [demo page](https://matteobrusa.github.io/Tumbless/). Hover in the top right corner or jump [here](https://matteobrusa.github.io/Tumbless/?admin) to access the admin interface with password `qwerty123`.
 No real S3 bucket is associated with this demo, so upload/edit will not work.
- 
+
 ## What doesn't work yet
 - Post media from url
 - Themes support
-- Disqus commenting 
+- Disqus commenting
 
 ## Migrate from Tumblr to your Tumbless instance
 To migrate a tumblr blog to Tumbless you can use this [export script](https://github.com/matteobrusa/TumblrToStaticExporter).
@@ -105,4 +105,3 @@ You can reach the admin page by appending `?admin` to the URL.
 S3 also supports static hosting on **custom domains**, très cool.
 
 **If you've read so far, I'd like to hear your feedback. Pull reqs are welcome.**
-
