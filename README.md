@@ -38,7 +38,11 @@ To migrate a tumblr blog to Tumbless you can use this [export script](https://gi
 ##### 1. Create a bucket on Amazon S3
 Enable Static Website hosting, and set the index document to `index.html`.
 
-##### 2. Set the CORS permissions as follows, to allow the authenticated admin user to store files:
+##### 2. Set the CORS permissions
+
+Under `Permissions`, click `Edit CORS Configuration`, and paste the
+following, to allow the authenticated admin user to store files:
+
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <CORSConfiguration xmlns="http://s3.amazonaws.com/doc/2006-03-01/">
@@ -53,6 +57,10 @@ Enable Static Website hosting, and set the index document to `index.html`.
 </CORSConfiguration>
 ```
 ##### 3. Set the bucket policy to allow static hosting by default:
+
+Click `Edit bucket policy`, then paste something like the following.
+Be sure to change `my-bucket-name` to the name of your bucket.
+
 ```json
 {
 	"Version": "2008-10-17",
@@ -70,9 +78,16 @@ Enable Static Website hosting, and set the index document to `index.html`.
 }
 ```
 ##### 4. Create an S3 user with IAM
-Save the bucket name and the credentials into the `admin.json` file.
 
-##### 5. Attach this custom policy to it
+Go to
+[the IAM Users page](https://console.aws.amazon.com/iam/home#uses) and
+click "Create New Users".  The name doesn't actually matter!
+
+Attach this custom policy to it: go to the `Permissions` tab, and
+click the `Inline Policies` row; click the `Create User Policy`
+button, and paste.  Again, be sure to change `my-bucket-name` to the
+name of your bucket.
+
 ```json
 {
     "Version": "2012-10-17",
@@ -91,15 +106,22 @@ Save the bucket name and the credentials into the `admin.json` file.
 }
 ```
 
-##### 5. Configure your blog
-Set your blog's title and description in the `config.json` file.
-Set the admin password by renaming the `admin.json` file to `admin-mysecureadminpassword.json`.
+##### 5. Save the bucket name and the credentials into the `admin.json` file.
+Then set the admin password by renaming `admin.json` to e.g. `admin-mysecureadminpassword.json`.
 
-##### 6. [Optional] Make your blog private
+##### 6. Configure your blog
+Set your blog's title and description in the `config.json` file.
+
+##### 7. [Optional] Make your blog private
 Rename the `public` folder to `private-mypassword`.
 
-##### 7. Test your blog
-Upload the files to your bucket with S3's web interface (s3cmd does not properly recognize MIME types).
+##### 8. Test your blog
+
+Upload the files to your bucket with S3's web interface (s3cmd does
+not properly recognize MIME types).  You'll need to upload the
+top-level files; then create a "public" folder, then upload its files,
+then create a "theme" folder, and upload _its_ files.
+
 You can now reach the blog at your bucket public endpoint, i.e., `mytumblessblog.com.s3-website.eu-central-1.amazonaws.com`.
 You can reach the admin page by appending `?admin` to the URL.
 S3 also supports static hosting on **custom domains**, très cool.
