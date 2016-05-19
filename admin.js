@@ -2,6 +2,8 @@
 
 var s3region, s3bucket, photoSize = 1600, thumbSize = 640, photoQ = 0.85, thumbQ = 0.80;
 
+var isAdmin= false;
+
 function loadAdmin(pwd) {
 
 	// recreateThumbnails();
@@ -301,7 +303,12 @@ function uploadPosts(callback) {
 }
 
 function uploadJson(filename, sJson, callback) {
-	s3Upload(baseUrl + filename, "application/json", sJson, callback);
+	// let's do a backup first 
+	s3Backup (baseUrl + filename, "application/json", function() {
+	
+		s3Upload(baseUrl + filename, "application/json", sJson, callback);
+	} );
+	
 }
 
 function uploadImage(prefix, filename, blob, callback) {
