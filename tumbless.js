@@ -35,7 +35,7 @@ function loadConfig() {
 
 function loadPosts() {
 	$.ajax({
-		url : baseUrl + "posts.json",
+		url : baseUrl + "posts.json?ts="+Date.now(),
 		dataType : "json",
 		success : function(data) {
 
